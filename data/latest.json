@@ -1,6 +1,6 @@
 {
   "date": "2026-10-04",
-  "updated": "2026-10-04T10:36:32.209Z",
+  "updated": "2026-10-04T10:39:16.056Z",
   "fx": {
     "TWD": 31.854,
     "JPY": 157.82
@@ -48,7 +48,7 @@
             "url": "https://snkrdunk.com/apparels/146897",
             "currency": "JPY",
             "date": "2026-10-04",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "stale": false
           },
           {
@@ -63,7 +63,7 @@
             "url": "https://snkrdunk.com/apparels/146897",
             "currency": "JPY",
             "date": "2026-10-04",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "stale": false
           },
           {
@@ -80,7 +80,7 @@
             "url": "https://price-base.com/useful/gogh-pikachu",
             "currency": "JPY",
             "date": "2026-10-04",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "stale": false
           },
           {
@@ -97,7 +97,7 @@
             "url": "https://price-base.com/useful/gogh-pikachu",
             "currency": "JPY",
             "date": "2026-10-04",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "stale": false
           }
         ],
@@ -145,6 +145,32 @@
       "spark": [
         148.36
       ],
+      "comparisons": {
+        "quotes": [
+          {
+            "metric": "sealed",
+            "price": 38799,
+            "kind": "listing",
+            "label": "新品最低掛價（1個）",
+            "variant": "1個",
+            "condition": "未拆封・1個",
+            "key": "snkrdunk:882798:sealed:1個:sealed",
+            "sourceKey": "snkrdunk:882798:sealed:1個",
+            "name": "SNKRDUNK",
+            "url": "https://snkrdunk.com/apparels/882798",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
+            "stale": false
+          }
+        ],
+        "errors": [],
+        "links": []
+      },
+      "comparisonLookup": {
+        "status": "matched",
+        "date": "2026-10-04"
+      },
       "date": "2026-10-04"
     },
     "704148": {
@@ -169,7 +195,7 @@
         "price": 56.74,
         "url": "https://www.tcgplayer.com/product/704148",
         "date": "2026-10-04",
-        "fetchedAt": "2026-10-04T10:36:32.209Z",
+        "fetchedAt": "2026-10-04T10:39:16.056Z",
         "stale": false
       },
       "sub": "Normal",
@@ -179,6 +205,32 @@
       "spark": [
         56.74
       ],
+      "comparisons": {
+        "quotes": [
+          {
+            "metric": "sealed",
+            "price": 10800,
+            "kind": "listing",
+            "label": "新品最低掛價（1個）",
+            "variant": "1個",
+            "condition": "未拆封・1個",
+            "key": "snkrdunk:883008:sealed:1個:sealed",
+            "sourceKey": "snkrdunk:883008:sealed:1個",
+            "name": "SNKRDUNK",
+            "url": "https://snkrdunk.com/apparels/883008",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
+            "stale": false
+          }
+        ],
+        "errors": [],
+        "links": []
+      },
+      "comparisonLookup": {
+        "status": "matched",
+        "date": "2026-10-04"
+      },
       "date": "2026-10-04"
     },
     "704171": {
@@ -209,6 +261,32 @@
       "spark": [
         71.46
       ],
+      "comparisons": {
+        "quotes": [
+          {
+            "metric": "sealed",
+            "price": 22000,
+            "kind": "listing",
+            "label": "新品最低掛價（1個）",
+            "variant": "1個",
+            "condition": "未拆封・1個",
+            "key": "snkrdunk:893600:sealed:1個:sealed",
+            "sourceKey": "snkrdunk:893600:sealed:1個",
+            "name": "SNKRDUNK",
+            "url": "https://snkrdunk.com/apparels/893600",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
+            "stale": false
+          }
+        ],
+        "errors": [],
+        "links": []
+      },
+      "comparisonLookup": {
+        "status": "matched",
+        "date": "2026-10-04"
+      },
       "date": "2026-10-04"
     },
     "704186": {
@@ -239,6 +317,21 @@
       "spark": [
         230.27
       ],
+      "comparisons": {
+        "quotes": [],
+        "errors": [
+          {
+            "name": "SNKRDUNK",
+            "url": "https://snkrdunk.com/apparels/903937",
+            "message": "SNKRDUNK「1個」目前沒有新品掛價"
+          }
+        ],
+        "links": []
+      },
+      "comparisonLookup": {
+        "status": "matched",
+        "date": "2026-10-04"
+      },
       "date": "2026-10-04"
     },
     "709110": {
@@ -282,7 +375,7 @@
             "kind": "listing",
             "label": "新品最低掛價（1個）",
             "variant": "1個",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "date": "2026-10-04",
             "stale": false
           },
@@ -296,7 +389,7 @@
             "label": "取引相場參考價",
             "sourceUpdated": "2026-10-03",
             "priceAsOf": "2026-10",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "date": "2026-10-04",
             "stale": false
           }
@@ -383,7 +476,7 @@
             "kind": "listing",
             "label": "新品最低掛價（1個）",
             "variant": "1個",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "date": "2026-10-04",
             "stale": false
           },
@@ -397,7 +490,7 @@
             "label": "取引相場參考價",
             "sourceUpdated": "2026-10-02",
             "priceAsOf": "2026-10",
-            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "fetchedAt": "2026-10-04T10:39:16.056Z",
             "date": "2026-10-04",
             "stale": false
           }
