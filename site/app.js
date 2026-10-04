@@ -45,6 +45,8 @@
   function ymd(d) { var p = parts(d); return p ? p[0] + "/" + p[1] + "/" + p[2] : (d || "—"); }
   function ts(d) { var p = parts(d); return p ? Date.UTC(p[0], p[1] - 1, p[2]) : NaN; }
   function fx() { var r = state.latest.fx && state.latest.fx.TWD; return isNum(r) && r > 0 ? r : 31.5; }
+  function jpyRate() { var f = state.latest.fx || {}; return isNum(f.JPY) && f.JPY > 0 ? fx() / f.JPY : 0.2; }
+  function yen(n) { return isNum(n) ? "¥" + nf.format(Math.round(n)) : "—"; }
   function $(id) { return document.getElementById(id); }
 
   function el(tag, props) {
@@ -118,6 +120,10 @@
       it.usd = isNum(it.market) ? it.market : isNum(it.low) ? it.low : null;
       it.twd = it.usd != null ? it.usd * fx() : null;
       it.edition = CAT_LABEL[it.cat] || "";
+      /* 日版商品在來源裡的價格是美國市場價，通常比日本當地高很多；有自填日本行情就改用它 */
+      it.jpy = it.cat === 85 && isNum(h.jpy) && h.jpy > 0 ? h.jpy : null;
+      it.jpyDate = h.jpyDate || "";
+      if (it.jpy != null) it.twd = it.jpy * jpyRate();
     });
     state.local.manual.forEach(function (m) {
       out.push({
@@ -316,7 +322,8 @@
       fact("填寫日期", it.asOf ? ymd(it.asOf) : null);
       chartBox.append(el("p", { class: "chart-note", text: "手動商品沒有自動價格來源，不會記錄走勢。價格可以在下面修改。" }));
     } else {
-      fact("市價", it.market != null ? usd(it.market) + "（約 " + fmt(it.market * fx()) + " 元）" : "尚無成交市價");
+      if (it.jpy != null) fact("日本行情", yen(it.jpy) + "（約 " + fmt(it.jpy * jpyRate()) + " 元）" + (it.jpyDate ? "，" + ymd(it.jpyDate) + " 自填" : "，自填"));
+      fact(it.cat === 85 ? "美國市場價" : "市價", it.market != null ? usd(it.market) + "（約 " + fmt(it.market * fx()) + " 元）" : "尚無成交市價");
       fact("最低掛價", it.low != null ? usd(it.low) + "（約 " + fmt(it.low * fx()) + " 元）" : null);
       fact("系列", it.group);
       fact("編號", it.number);
@@ -337,11 +344,13 @@
     var cost = el("input", { id: "cost-" + it.key, type: "number", min: 0, step: 1, inputmode: "numeric", value: it.cost != null ? it.cost : "" });
     var note = el("input", { id: "note-" + it.key, maxlength: 120, value: it.note || "" });
     var price = it.type === "manual" ? el("input", { id: "price-" + it.key, type: "number", min: 0, step: 1, inputmode: "numeric", value: it.twd != null ? it.twd : "" }) : null;
+    var jpy = it.type !== "manual" && it.cat === 85 ? el("input", { id: "jpy-" + it.key, type: "number", min: 0, step: 1, inputmode: "numeric", placeholder: "例如 9700", value: it.jpy != null ? it.jpy : "" }) : null;
     var msg = el("div", { role: "status" });
     var form = el("form", { class: "form" },
       el("label", null, "持有數量", qty),
       el("label", null, "成本單價（台幣）", cost),
       price ? el("label", null, "行情單價（台幣）", price) : null,
+      jpy ? el("label", null, "日本行情（日圓，自填）", jpy) : null,
       el("label", null, "備註", note),
       el("button", { class: "btn primary", type: "submit", text: "儲存" }));
     form.addEventListener("submit", function (ev) {
@@ -355,7 +364,12 @@
           if (isNum(pr) && pr !== m.price) { m.price = pr; m.priceDate = todayStr(); }
         });
       } else {
-        state.local.holdings[it.key] = { qty: isNum(q) ? q : 0, cost: isNum(c) ? c : null, note: note.value.trim() };
+        var rec = { qty: isNum(q) ? q : 0, cost: isNum(c) ? c : null, note: note.value.trim() };
+        if (jpy) {
+          var j = parseFloat(jpy.value);
+          if (isNum(j) && j > 0) { rec.jpy = j; rec.jpyDate = j === it.jpy && it.jpyDate ? it.jpyDate : todayStr(); }
+        }
+        state.local.holdings[it.key] = rec;
       }
       if (!saveLocal()) { msg.textContent = "瀏覽器不允許儲存，資料只會保留到關閉頁面為止。"; }
       renderList();
@@ -407,8 +421,12 @@
       if (it.type === "pending") { box.textContent = ""; box.append(el("p", { class: "chart-note", text: "這個商品還沒有每日紀錄，所以沒有走勢。按下面的「加入每日紀錄」後，隔天開始累積。" })); }
       return;
     }
-    var costUsd = it.cost != null ? it.cost / fx() : null;
-    loadHistory(it.pid).then(function (pts) { if (state.open[it.key]) drawChart(box, it.name, pts, costUsd); });
+    var costUsd = it.cost != null && it.cat !== 85 ? it.cost / fx() : null;
+    loadHistory(it.pid).then(function (pts) {
+      if (!state.open[it.key]) return;
+      drawChart(box, it.name, pts, costUsd);
+      if (it.cat === 85) box.append(el("p", { class: "chart-note", text: "這條走勢是美國市場價，不是日本當地行情。日版商品在美國通常貴很多，要看日本行情請在下面自己填日圓價格。" }));
+    });
   }
 
   function renderList() {
@@ -452,7 +470,10 @@
         el("div", { class: "spark" }, it.spark.filter(isNum).length > 1 ? sparkline(it.spark.filter(isNum)) : (it.type === "tracked" && !it.waiting ? "累積中" : "")),
         el("div", { class: "cell-r price-cell" },
           has ? el("div", { class: "price", text: fmt(it.twd) }) : el("div", { class: "price none", text: "尚無價格" }),
-          el("div", { class: "small" }, it.usd != null ? usd(it.usd) + " " : "", chg != null ? el("span", { class: "dir " + dirOf(chg), text: glyph(dirOf(chg)) + " " + pct(chg) }) : null)),
+          el("div", { class: "small" },
+            it.jpy != null ? yen(it.jpy) + " 自填" + (it.usd != null ? " · 美國 " + usd(it.usd) : "")
+              : (it.usd != null ? usd(it.usd) + (it.cat === 85 ? " 美國市場價 " : " ") : ""),
+            it.jpy == null && chg != null ? el("span", { class: "dir " + dirOf(chg), text: glyph(dirOf(chg)) + " " + pct(chg) }) : null)),
         el("div", { class: "cell-r" },
           pl != null ? el("div", { class: "pl dir " + dirOf(pl), text: glyph(dirOf(pl)) + " " + signed(pl) }) : el("div", { class: "price none", text: "—" }),
           el("div", { class: "small", text: pl != null && plPct != null ? "單價 " + pct(plPct) : (it.qty > 0 ? "" : "未填持有") })),
@@ -535,7 +556,8 @@
       var hits = search(c, q);
       box.textContent = "";
       box.hidden = !hits.length;
-      hint.textContent = hits.length ? "找到 " + nf.format(hits.length) + " 筆" + (hits.length > MAX_RESULTS ? "，顯示價格最高的前 " + MAX_RESULTS + " 筆。加上編號或系列名稱可以縮小範圍。" : "。") + "　資料日期 " + ymd(c.date)
+      hint.textContent = hits.length ? "找到 " + nf.format(hits.length) + " 筆" + (hits.length > MAX_RESULTS ? "，顯示價格最高的前 " + MAX_RESULTS + " 筆。加上編號或系列名稱可以縮小範圍。" : "。") + "　資料日期 " + ymd(c.date) +
+          (state.scope === "jp" ? "　注意：日版顯示的是美國市場價，通常比日本當地行情高很多。" : "")
         : "找不到符合的商品。試試英文卡名或編號，或切換美版／日版。";
       var inList = {};
       listItems().forEach(function (x) { if (x.pid) inList[x.pid] = true; });
