@@ -1,0 +1,9 @@
+.git
+.cache
+.build-*
+.previous-dist
+dist
+storage
+node_modules
+.env
+test

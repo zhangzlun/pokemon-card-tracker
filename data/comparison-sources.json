@@ -1,0 +1,17 @@
+{
+  "518861": {
+    "sources": [
+      { "source": "snkrdunk-single", "apparelId": 146897, "size": "1枚" },
+      { "source": "pricebase-buyback", "url": "https://price-base.com/useful/gogh-pikachu", "cardName": "pikachu with grey felt hat", "cardNumber": "085" }
+    ],
+    "links": [
+      { "name": "PriceCharting", "url": "https://www.pricecharting.com/game/pokemon-promo/pikachu-with-grey-felt-hat-85", "note": "裸卡與各鑑定等級分列；目前自動抓取需網站驗證，請開原站查看" },
+      { "name": "Cardmarket", "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/SV-Black-Star-Promos/Pikachu-with-Grey-Felt-Hat-SVP085", "note": "歐洲市場、歐元報價；目前自動抓取需網站驗證，請開原站查看" }
+    ]
+  },
+  "148151": {
+    "sources": [
+      { "source": "snkrdunk-single", "apparelId": 738210, "size": "1枚" }
+    ]
+  }
+}

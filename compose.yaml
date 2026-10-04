@@ -1,0 +1,18 @@
+services:
+  tracker:
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${NAS_BIND_IP:?請在 .env 填入 NAS 區網 IP}:5173:5173"
+      - "127.0.0.1:${TAILSCALE_BACKEND_PORT:-5174}:5173"
+    environment:
+      PUBLIC_ORIGINS: "${PUBLIC_ORIGINS:?請設定手機使用的網站網址}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+    volumes:
+      - ./storage:/storage
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
