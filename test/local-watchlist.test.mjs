@@ -33,6 +33,7 @@ async function fixture(t, options = {}) {
 
 test('local add repairs a missing USD market price using the original site and persists a dated observation', async (t) => {
   const f = await fixture(t, { fetchImpl: async (url) => {
+    if (url.startsWith('https://snkrdunk.com/search?')) return new Response('');
     assert.equal(url, 'https://mpapi.tcgplayer.com/v2/product/704148/pricepoints');
     return Response.json([{ printingType: 'Normal', marketPrice: 56.74, listedMedianPrice: null }]);
   } });
@@ -89,6 +90,54 @@ test('a newly tracked single card accepts its own SNKRDUNK URL mapping and repor
     comparisons: { sources: [{ source: 'snkrdunk-single', apparelId: 738210, size: 'PSA8' }] } } });
   assert.equal(invalid.status, 400);
   assert.deepEqual((await readJson(path.join(f.root, 'data/watchlist.json'))).items[0].comparisons, config);
+});
+
+test('adding an unmapped single card discovers a unique SNKRDUNK match and fetches A and PSA10', async (t) => {
+  const requests = [];
+  const f = await fixture(t, { fetchImpl: async (url) => {
+    requests.push(url);
+    if (url.startsWith('https://snkrdunk.com/search?')) return new Response(
+      '<a href="https://snkrdunk.com/apparels/455596" class="tile" aria-label="ブラッキーex SAR [SV8a 217/187] - ¥42,000">' +
+      '<a href="https://snkrdunk.com/apparels/555555" class="tile" aria-label="ブラッキーex [SV8aF 217/187]【中国語版】 - ¥8,000">');
+    assert.equal(url, 'https://snkrdunk.com/v2/products/455596/size-chips?type=apparel');
+    return Response.json({ chips: [
+      { conditionCode: 'trading_card_single_nearly_unused', filterConditionId: 'like_new', text: 'A', usedMinPrice: 42000, hasListing: true },
+      { conditionCode: 'trading_card_single_psa10', filterConditionId: 'psa_10', text: 'PSA10', usedMinPrice: 80000, hasListing: true }
+    ] });
+  } });
+  await writeJson(path.join(f.root, 'dist/data/catalog-jp.json'), { date: '2026-10-04', cat: 85,
+    groups: [[1, 'SV8a: Terastal Fest ex', 'SV8a']], items: [[602681, 0, 'Umbreon ex - 217/187', '217/187', 0, [['Normal', 150, null]]]] });
+  const response = await f.post({ action: 'upsert', entry: { pid: 602681, cat: 85 } });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.watch.items[0].comparisons.sources[0].apparelId, 455596);
+  assert.deepEqual(result.latest.items[602681].comparisons.quotes.map((q) => [q.metric, q.price]), [['a', 42000], ['psa10', 80000]]);
+  assert.equal(result.latest.items[602681].market, 150);
+  assert.equal(requests.length, 2);
+  const again = await f.post({ action: 'upsert', entry: { pid: 602681, cat: 85 } });
+  assert.equal(again.status, 200);
+  assert.equal(requests.filter((url) => url.startsWith('https://snkrdunk.com/search?')).length, 1);
+});
+
+test('adding an unmapped sealed English product discovers the exact package and fetches one-unit price', async (t) => {
+  const requests = [];
+  const f = await fixture(t, { fetchImpl: async (url) => {
+    requests.push(url);
+    if (url.startsWith('https://snkrdunk.com/search?')) return new Response(
+      '<a href="https://snkrdunk.com/apparels/893600" class="tile" aria-label="ポケモンカードゲームMEGA(英語版) ブースターバンドル「30th CELEBRATION」ボックス - ¥22,000">' +
+      '<a href="https://snkrdunk.com/apparels/893601" class="tile" aria-label="ポケモンカードゲームMEGA(英語版) ブースターバンドル「30th CELEBRATION」パック - ¥4,000">');
+    assert.equal(url, 'https://snkrdunk.com/v1/apparels/893600/sizes');
+    return Response.json({ sizePrices: [{ size: { localizedName: '1個', isDeleted: false }, minNewListingPrice: 22000 }] });
+  } });
+  await writeJson(path.join(f.root, 'dist/data/catalog-en.json'), { date: '2026-10-04', cat: 3,
+    groups: [[1, 'ME: 30th Celebration', '30C']], items: [[704171, 0, '30th Celebration Booster Bundle', '', 1, [['Normal', 120, null]]]] });
+  const response = await f.post({ action: 'upsert', entry: { pid: 704171, cat: 3 } });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.watch.items[0].comparisons.sources[0].apparelId, 893600);
+  assert.deepEqual(result.latest.items[704171].comparisons.quotes.map((q) => [q.metric, q.price]), [['sealed', 22000]]);
+  assert.equal(result.latest.items[704171].market, 120);
+  assert.equal(requests.length, 2);
 });
 
 test('local add uses automatic mapping, immediately fetches JPY and persists without a GitHub token', async (t) => {
