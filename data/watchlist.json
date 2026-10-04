@@ -1,10 +1,58 @@
 {
   "items": [
-    { "pid": 704143, "cat": 3, "zh": "美版 30 週年 ETB" },
-    { "pid": 704171, "cat": 3, "zh": "美版 30 週年 Booster Bundle" },
-    { "pid": 704186, "cat": 3, "zh": "美版 30 週年 Mini Tin 整盒" },
-    { "pid": 704148, "cat": 3, "zh": "美版 30 週年 2-Pack Blister" },
-    { "pid": 709110, "cat": 85, "zh": "日版烈空 補充盒" },
-    { "pid": 518861, "cat": 3, "zh": "梵谷皮卡丘" }
+    {
+      "pid": 704143,
+      "cat": 3,
+      "zh": "美版 30 週年 ETB"
+    },
+    {
+      "pid": 704171,
+      "cat": 3,
+      "zh": "美版 30 週年 Booster Bundle"
+    },
+    {
+      "pid": 704186,
+      "cat": 3,
+      "zh": "美版 30 週年 Mini Tin 整盒"
+    },
+    {
+      "pid": 704148,
+      "cat": 3,
+      "zh": "美版 30 週年 2-Pack Blister"
+    },
+    {
+      "pid": 709110,
+      "cat": 85,
+      "zh": "日版烈空 補充盒",
+      "japan": {
+        "preferred": "snkrdunk",
+        "snkrdunk": {
+          "apparelId": 846048,
+          "size": "1個"
+        },
+        "pricebase": {
+          "url": "https://price-base.com/useful/stormemeralda-box-market"
+        }
+      }
+    },
+    {
+      "pid": 518861,
+      "cat": 3,
+      "zh": "梵谷皮卡丘"
+    },
+    {
+      "pid": 718620,
+      "cat": 85,
+      "japan": {
+        "preferred": "snkrdunk",
+        "snkrdunk": {
+          "apparelId": 881421,
+          "size": "1個"
+        },
+        "pricebase": {
+          "url": "https://price-base.com/useful/30thcelebration-market"
+        }
+      }
+    }
   ]
 }

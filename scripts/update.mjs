@@ -4,10 +4,15 @@
 // 不需要任何套件，Node 20 以上即可。
 
 import fs from 'node:fs/promises';
+import { updateComparisons, comparisonConfigs } from './comparison-prices.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveUsdPrice, recordUsdPrice } from './us-prices.mjs';
+import { sourceConfigs, updateJapanPrices } from './japan-prices.mjs';
+import { loadLatest, loadHistory, withJapanDefaults } from './data-store.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const CODE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = path.resolve(process.env.TRACKER_ROOT || CODE_ROOT);
 const BASE = (process.env.TCGCSV_BASE || 'https://tcgcsv.com/tcgplayer').replace(/\/$/, '');
 const FX_URL = process.env.FX_URL || 'https://open.er-api.com/v6/latest/USD';
 const REPO = process.env.GITHUB_REPOSITORY || '';
@@ -31,7 +36,11 @@ async function readJson(file, fallback) {
 }
 async function writeJson(file, data, pretty = false) {
   await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(file, JSON.stringify(data, null, pretty ? 2 : 0) + (pretty ? '\n' : ''));
+  const temp = `${file}.${process.pid}.tmp`;
+  try {
+    await fs.writeFile(temp, JSON.stringify(data, null, pretty ? 2 : 0) + (pretty ? '\n' : ''));
+    await fs.rename(temp, file);
+  } finally { await fs.rm(temp, { force: true }); }
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -140,17 +149,27 @@ async function loadFx(previous) {
   }
 }
 
-/** 一個商品可能有多種版本（Normal、Holofoil…），挑一個當作主要價格。 */
-function pickPrimary(prices, wanted) {
-  if (!prices.length) return null;
-  return prices.find((x) => x[0] === wanted) || prices.find((x) => x[1] != null) || prices[0];
-}
-
 async function main() {
   console.log(`更新日期（台北）：${today}，來源：${BASE}`);
-  const previous = await readJson(p('data', 'latest.json'), {});
+  const previous = await loadLatest(ROOT, LOCAL);
   const watchlist = await readJson(p('data', 'watchlist.json'), { items: [] });
-  const dist = p('dist');
+  const comparisons = await readJson(p('data', 'comparison-sources.json'), {});
+  for (const config of Object.values(comparisons)) comparisonConfigs(config);
+  const defaults = await readJson(p('data', 'japan-sources.json'), {});
+  watchlist.items = watchlist.items.map((w) => withJapanDefaults(w, defaults));
+  // Reject invalid mappings before touching build output or recorded prices.
+  for (const w of watchlist.items || []) {
+    if (w.japan) sourceConfigs(w.japan);
+    if (w.comparisons) comparisonConfigs(w.comparisons);
+  }
+  const histories = new Map();
+  for (const w of watchlist.items) {
+    for (const suffix of ['', '-jpy', '-comparisons']) {
+      const name = `${w.pid}${suffix}.json`;
+      histories.set(name, await loadHistory(ROOT, name, LOCAL));
+    }
+  }
+  const dist = p('.build-' + process.pid);
   await fs.rm(dist, { recursive: true, force: true });
   await fs.mkdir(path.join(dist, 'data'), { recursive: true });
 
@@ -162,9 +181,10 @@ async function main() {
   }
 
   // 先把網頁和既有資料放進 dist，後面再把今天的價格寫進去
-  await fs.cp(p('site'), dist, { recursive: true });
+  await fs.cp(path.join(CODE_ROOT, 'site'), dist, { recursive: true });
   await fs.cp(p('data'), path.join(dist, 'data'), { recursive: true });
-  const dataDirs = LOCAL ? [path.join(dist, 'data')] : [p('data'), path.join(dist, 'data')];
+  const dataDirs = LOCAL ? [p('.cache', 'local-data'), path.join(dist, 'data')] : [p('data'), path.join(dist, 'data')];
+  await writeJson(path.join(dist, 'data', 'watchlist.json'), watchlist, true);
 
   const fx = await loadFx(previous.fx);
   const latest = { date: today, updated: new Date().toISOString(), fx, items: {} };
@@ -172,32 +192,53 @@ async function main() {
   for (const w of watchlist.items || []) {
     const pid = Number(w.pid);
     const info = index.get(pid);
-    const histFile = p('data', 'history', `${pid}.json`);
-    const hist = await readJson(histFile, { pid, points: [] });
+    let hist = { pid, points: [], ...histories.get(`${pid}.json`) };
+    let japan, comparisonResult;
+    const comparisonConfig = Object.hasOwn(w, 'comparisons') ? w.comparisons : comparisons[pid];
+    if (comparisonConfig) {
+      comparisonResult = await updateComparisons({ config: comparisonConfig, previous: previous.items?.[pid]?.comparisons,
+        history: { pid, ...histories.get(`${pid}-comparisons.json`) }, date: today, updated: latest.updated, userAgent: UA });
+      for (const dir of dataDirs) await writeJson(path.join(dir, 'history', `${pid}-comparisons.json`), comparisonResult.history);
+    }
+    if (w.japan) {
+      const historyName = `${pid}-jpy.json`;
+      const result = await updateJapanPrices({ config: w.japan, previous: previous.items?.[pid]?.japan,
+        history: { pid, ...histories.get(historyName) }, date: today,
+        updated: latest.updated, userAgent: UA });
+      japan = result.japan;
+      for (const dir of dataDirs) await writeJson(path.join(dir, 'history', historyName), result.history);
+      console.log(`日本行情 ${pid}：${Object.values(japan.quotes).map((q) => `${q.source} ${q.price == null ? '無報價' : '¥' + q.price}${q.stale ? '（更新失敗）' : ''}`).join('，')}`);
+    }
     if (!info) {
-      latest.items[pid] = { pid, cat: w.cat, name: w.name || `#${pid}`, zh: w.zh || '', missing: true, spark: hist.points.slice(-SPARK_POINTS).map((x) => x[1]) };
+      const old = previous.items?.[pid] || {};
+      latest.items[pid] = { pid, cat: w.cat, name: w.name || old.name || `#${pid}`, group: old.group || '', zh: w.zh || '',
+        missing: !japan?.selected, japan, comparisons: comparisonResult?.comparisons, spark: hist.points.slice(-SPARK_POINTS).map((x) => x[1]) };
       console.warn(`追蹤清單的商品 ${pid} 在來源裡找不到`);
       continue;
     }
-    const primary = pickPrimary(info.prices, w.sub);
-    if (primary) {
-      const point = [today, primary[1], primary[2]];
-      if (hist.points.length && hist.points[hist.points.length - 1][0] === today) hist.points[hist.points.length - 1] = point;
-      else hist.points.push(point);
-      hist.name = info.name;
-      hist.sub = primary[0];
-      for (const dir of dataDirs) await writeJson(path.join(dir, 'history', `${pid}.json`), hist);
-    }
+    const usdResult = await resolveUsdPrice({ pid, prices: info.prices, wanted: w.sub, previous: previous.items?.[pid],
+      date: today, updated: latest.updated, userAgent: UA });
+    const { primary, usdQuote } = usdResult;
+    hist = recordUsdPrice(hist, usdResult, today, info.name);
+    for (const dir of dataDirs) await writeJson(path.join(dir, 'history', `${pid}.json`), hist);
     const pts = hist.points;
     latest.items[pid] = {
       pid, cat: info.cat, name: info.name, zh: w.zh || '', group: info.group, abbr: info.abbr, number: info.number, sealed: info.sealed,
-      prices: info.prices, sub: primary ? primary[0] : '', market: primary ? primary[1] : null, low: primary ? primary[2] : null,
+      prices: usdResult.prices, usdQuote, sub: primary ? primary[0] : '', market: primary ? primary[1] : null, low: primary ? primary[2] : null,
       prev: pts.length > 1 ? pts[pts.length - 2][1] : null,
       spark: pts.slice(-SPARK_POINTS).map((x) => x[1]),
+      japan, comparisons: comparisonResult?.comparisons, date: usdQuote.date || today,
     };
   }
   for (const dir of dataDirs) await writeJson(path.join(dir, 'latest.json'), latest, true);
   await writeJson(path.join(dist, 'data', 'config.json'), { repo: REPO });
+  // Publish only after a complete build; readers keep the previous data during fetches.
+  const backup = p('.previous-dist');
+  await fs.rm(backup, { recursive: true, force: true });
+  try { await fs.rename(p('dist'), backup); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  try { await fs.rename(dist, p('dist')); }
+  catch (error) { await fs.rename(backup, p('dist')).catch(() => {}); throw error; }
+  await fs.rm(backup, { recursive: true, force: true });
   console.log(`完成：追蹤 ${Object.keys(latest.items).length} 項，匯率 1 USD = ${fx.TWD} TWD${LOCAL ? '（本機模式，沒有改動 data/）' : ''}`);
 }
 

@@ -1,0 +1,12 @@
+{
+  "709110": {
+    "preferred": "snkrdunk",
+    "snkrdunk": { "apparelId": 846048, "size": "1個" },
+    "pricebase": { "url": "https://price-base.com/useful/stormemeralda-box-market" }
+  },
+  "718620": {
+    "preferred": "snkrdunk",
+    "snkrdunk": { "apparelId": 881421, "size": "1個" },
+    "pricebase": { "url": "https://price-base.com/useful/30thcelebration-market" }
+  }
+}

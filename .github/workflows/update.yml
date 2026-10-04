@@ -10,8 +10,12 @@ on:
     paths:
       - "site/**"
       - "scripts/**"
+      - "test/**"
+      - "package.json"
       - "data/watchlist.json"
       - "data/aliases.json"
+      - "data/japan-sources.json"
+      - "data/comparison-sources.json"
       - ".github/workflows/update.yml"
 
 permissions:
@@ -42,6 +46,9 @@ jobs:
           path: .cache
           key: products-${{ github.run_id }}
           restore-keys: products-
+
+      - name: Test price adapters
+        run: npm ci && npm test
 
       - name: Fetch prices and build site
         run: node scripts/update.mjs
