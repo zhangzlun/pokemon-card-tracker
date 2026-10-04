@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { comparisonConfigs, updateComparisons } from './comparison-prices.mjs';
+import { comparisonConfigs, discoverSealedProduct, discoverSingleProduct, updateComparisons } from './comparison-prices.mjs';
 import { dataDirs, loadLatest, loadHistory, readJson, writeJson, withJapanDefaults } from './data-store.mjs';
 import { resolveUsdPrice, recordUsdPrice } from './us-prices.mjs';
 import { sourceConfigs, updateJapanPrices } from './japan-prices.mjs';
@@ -32,12 +32,25 @@ export function createLocalWatchlist(root, { fetchImpl = fetch, now = () => new 
       if (typeof input.entry.zh === 'string') entry.zh = input.entry.zh.slice(0, 120);
       if (typeof input.entry.sub === 'string') entry.sub = input.entry.sub.slice(0, 80);
       if (Object.hasOwn(input.entry, 'japan')) entry.japan = input.entry.japan;
-      if (Object.hasOwn(input.entry, 'comparisons')) entry.comparisons = input.entry.comparisons;
+      if (input.entry.comparisons === 'auto') delete entry.comparisons;
+      else if (Object.hasOwn(input.entry, 'comparisons')) entry.comparisons = input.entry.comparisons;
       const resolved = withJapanDefaults(entry, defaults);
       if (resolved.japan) sourceConfigs(resolved.japan);
+      const group = catalog.groups[item[1]] || [];
+      let comparisonLookup = null;
+      if (!Object.hasOwn(resolved, 'comparisons') && !comparisons[pid] && !(cat === 85 && resolved.japan)) {
+        try {
+          const card = { cat, name: item[2], number: item[3], group: group[1], abbr: group[2], sealed: item[4] };
+          resolved.comparisons = await (item[4] ? discoverSealedProduct(card, { fetchImpl }) : discoverSingleProduct(card, { fetchImpl }));
+          if (!resolved.comparisons) delete resolved.comparisons;
+          comparisonLookup = { status: resolved.comparisons ? 'matched' : 'not_found', date: today(now()) };
+        } catch (error) {
+          comparisonLookup = { status: 'failed', date: today(now()) };
+          console.warn(`SNKRDUNK 單卡搜尋 ${pid}：${error.message}`);
+        }
+      }
       const comparisonConfig = Object.hasOwn(resolved, 'comparisons') ? resolved.comparisons : comparisons[pid];
       if (comparisonConfig) comparisonConfigs(comparisonConfig);
-      const group = catalog.groups[item[1]] || [];
       const old = latest.items[pid] || {};
       const stamp = now();
       const usdResult = await resolveUsdPrice({ pid, prices: item[5], wanted: resolved.sub, previous: old,
@@ -48,7 +61,8 @@ export function createLocalWatchlist(root, { fetchImpl = fetch, now = () => new 
       for (const dir of dataDirs(root, true)) await writeJson(path.join(dir, 'history', `${pid}.json`), usdHistory);
       const info = { ...old, pid, cat, name: item[2], number: item[3], sealed: item[4], group: group[1] || '', abbr: group[2] || '',
         zh: resolved.zh || '', prices: usdResult.prices, usdQuote, sub: primary?.[0] || '', market: primary?.[1] ?? null, low: primary?.[2] ?? null,
-        date: usdQuote.date || catalog.date, missing: false, spark: usdHistory.points.slice(-30).map((p) => p[1]), prev: usdHistory.points.at(-2)?.[1] ?? null };
+        date: usdQuote.date || catalog.date, missing: false, spark: usdHistory.points.slice(-30).map((p) => p[1]), prev: usdHistory.points.at(-2)?.[1] ?? null,
+        comparisonLookup: comparisonLookup || old.comparisonLookup };
       if (resolved.japan) {
         const historyName = `${pid}-jpy.json`;
         const stamp = now();

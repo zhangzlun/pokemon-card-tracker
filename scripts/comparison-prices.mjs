@@ -1,13 +1,87 @@
 // Reference quotes are independent of portfolio valuation and of one another.
+import { parseSnkrdunk } from './japan-prices.mjs';
 const text = (s) => s.replace(/<[^>]*>/g, '').replace(/&nbsp;|&#160;/g, ' ').trim();
 const yen = (v) => Number.isSafeInteger(v) && v > 0;
 
+// Auto-match only a unique printed set code + card number. The catalogue name
+// may be English while the Japanese product title uses Japanese characters.
+export function findSingleProduct(html, { cat, number, abbr }) {
+  if (![3, 85].includes(cat) || !number || typeof number !== 'string') return null;
+  const cardNumber = number.trim();
+  const setCode = String(abbr || '').trim();
+  if (!/^[a-z\d/-]{2,24}$/i.test(cardNumber) || (cardNumber.includes('/') && !/^[a-z\d-]{2,12}$/i.test(setCode))) return null;
+  const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const printed = cardNumber.includes('/') ? `${escape(setCode)}\\s+${escape(cardNumber)}` : escape(cardNumber);
+  const exact = new RegExp(`\\[\\s*${printed}\\s*\\]`, 'i');
+  const ids = new Set();
+  for (const match of html.matchAll(/<a\s+href="https:\/\/snkrdunk\.com\/apparels\/([1-9]\d+)"[^>]*\baria-label="([^"]+)"/g)) {
+    const label = match[2];
+    if (!exact.test(label)) continue;
+    if (cat === 3 && !label.includes('【英語版】')) continue;
+    if (cat === 85 && /【(?:英語版|中国語版|韓国語版)】/.test(label)) continue;
+    ids.add(Number(match[1]));
+  }
+  return ids.size === 1 ? [...ids][0] : null;
+}
+
+export async function discoverSingleProduct(card, { fetchImpl = fetch, userAgent = 'pokemon-card-tracker' } = {}) {
+  if (card.sealed || !card.number) return null;
+  const query = card.number.includes('/') ? `${card.abbr || ''} ${card.number}`.trim() : card.number;
+  if (query.length < 3) return null;
+  const url = `https://snkrdunk.com/search?keywords=${encodeURIComponent(query)}`;
+  const response = await fetchImpl(url, { headers: { 'User-Agent': userAgent, Accept: 'text/html' }, signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`SNKRDUNK 搜尋 HTTP ${response.status}`);
+  const id = findSingleProduct(await response.text(), card);
+  return id ? { sources: [{ source: 'snkrdunk-single', apparelId: id, size: '1枚' }] } : null;
+}
+
+function sealedPackage(name) {
+  if (/Pokemon Center Elite Trainer Box/i.test(name)) return { terms: ['エリートトレーナーボックス', 'ポケモンセンター'] };
+  if (/Elite Trainer Box/i.test(name)) return { terms: ['エリートトレーナーボックス'], exclude: ['ポケモンセンター'] };
+  if (/Booster Bundle/i.test(name)) return { terms: ['ブースターバンドル', 'ボックス'], exclude: ['パック'] };
+  if (/Mini Tin Display/i.test(name)) return { terms: ['ミニティン', 'ディスプレイボックス'] };
+  if (/2-Pack Blister/i.test(name)) return { terms: ['2パックブリスター'] };
+  return null;
+}
+
+export function findSealedProduct(html, card) {
+  if (card.cat !== 3 || !card.sealed || !sealedPackage(card.name)) return null;
+  const setName = String(card.group || '').split(':').slice(1).join(':').trim().toLowerCase();
+  if (setName.length < 8) return null;
+  const packageRule = sealedPackage(card.name);
+  const ids = new Set();
+  for (const match of html.matchAll(/<a\s+href="https:\/\/snkrdunk\.com\/apparels\/([1-9]\d+)"[^>]*\baria-label="([^"]+)"/g)) {
+    const label = match[2];
+    if (!label.includes('(英語版)') || label.includes('[') || !label.toLowerCase().includes(setName)) continue;
+    if (!packageRule.terms.every((term) => label.includes(term)) || packageRule.exclude?.some((term) => label.includes(term))) continue;
+    ids.add(Number(match[1]));
+  }
+  return ids.size === 1 ? [...ids][0] : null;
+}
+
+export async function discoverSealedProduct(card, { fetchImpl = fetch, userAgent = 'pokemon-card-tracker' } = {}) {
+  if (card.cat !== 3 || !card.sealed || !sealedPackage(card.name)) return null;
+  const url = `https://snkrdunk.com/search?keywords=${encodeURIComponent(card.name)}`;
+  const response = await fetchImpl(url, { headers: { 'User-Agent': userAgent, Accept: 'text/html' }, signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`SNKRDUNK 搜尋 HTTP ${response.status}`);
+  const id = findSealedProduct(await response.text(), card);
+  return id ? { sources: [{ source: 'snkrdunk-sealed', apparelId: id, size: '1個' }] } : null;
+}
+
 export function comparisonConfigs(config = {}) {
+  if (!config || typeof config !== 'object' || Array.isArray(config) || (config.sources !== undefined && !Array.isArray(config.sources))) {
+    throw new Error('比價來源設定無效');
+  }
   return (config.sources || []).map((s) => {
     if (s.source === 'snkrdunk-single' || s.source === 'snkrdunk-used') {
       if (!Number.isSafeInteger(s.apparelId) || s.apparelId <= 0 || s.size !== '1枚') throw new Error('SNKRDUNK 單卡規格必須是 1枚');
       return { ...s, key: `snkrdunk:${s.apparelId}:condition`, name: 'SNKRDUNK',
         url: `https://snkrdunk.com/apparels/${s.apparelId}`, fetchUrl: `https://snkrdunk.com/v2/products/${s.apparelId}/size-chips?type=apparel` };
+    }
+    if (s.source === 'snkrdunk-sealed') {
+      if (!Number.isSafeInteger(s.apparelId) || s.apparelId <= 0 || s.size !== '1個') throw new Error('SNKRDUNK 盒裝規格必須是 1個');
+      return { ...s, key: `snkrdunk:${s.apparelId}:sealed:1個`, name: 'SNKRDUNK',
+        url: `https://snkrdunk.com/apparels/${s.apparelId}`, fetchUrl: `https://snkrdunk.com/v1/apparels/${s.apparelId}/sizes` };
     }
     if (s.source === 'pricebase-buyback') {
       const url = new URL(s.url);
@@ -70,7 +144,9 @@ export async function updateComparisons({ config, previous = {}, history = {}, d
       const response = await fetchImpl(source.fetchUrl, { headers: { 'User-Agent': userAgent,
         Accept: source.name === 'SNKRDUNK' ? 'application/json' : 'text/html' }, signal: AbortSignal.timeout(30000) });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const parsed = source.name === 'SNKRDUNK' ? parseSingleConditions(await response.json()) : parseBuyback(await response.text(), source);
+      const parsed = source.source === 'snkrdunk-sealed'
+        ? [{ metric: 'sealed', ...parseSnkrdunk(await response.json(), '1個'), condition: '未拆封・1個' }]
+        : source.name === 'SNKRDUNK' ? parseSingleConditions(await response.json()) : parseBuyback(await response.text(), source);
       for (const item of parsed) {
         const key = `${source.key}:${item.metric}`;
         const quote = { ...item, key, sourceKey: source.key, name: source.name, url: source.url, currency: 'JPY',

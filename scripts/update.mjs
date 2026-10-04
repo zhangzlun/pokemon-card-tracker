@@ -4,7 +4,7 @@
 // 不需要任何套件，Node 20 以上即可。
 
 import fs from 'node:fs/promises';
-import { updateComparisons, comparisonConfigs } from './comparison-prices.mjs';
+import { updateComparisons, comparisonConfigs, discoverSealedProduct, discoverSingleProduct } from './comparison-prices.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveUsdPrice, recordUsdPrice } from './us-prices.mjs';
@@ -180,6 +180,22 @@ async function main() {
     await writeJson(path.join(dist, 'data', `catalog-${cat.key}.json`), built.catalog);
   }
 
+  const lookupResults = new Map();
+  let discovered = false;
+  for (const w of watchlist.items) {
+    const card = index.get(Number(w.pid));
+    if (!card || Object.hasOwn(w, 'comparisons') || comparisons[w.pid] || (card.cat === 85 && w.japan)) continue;
+    try {
+      const found = await (card.sealed ? discoverSealedProduct(card, { userAgent: UA }) : discoverSingleProduct(card, { userAgent: UA }));
+      lookupResults.set(Number(w.pid), { status: found ? 'matched' : 'not_found', date: today });
+      if (found) { w.comparisons = found; discovered = true; console.log(`SNKRDUNK 對照 ${w.pid}：${found.sources[0].apparelId}`); }
+    } catch (error) {
+      lookupResults.set(Number(w.pid), { status: 'failed', date: today });
+      console.warn(`SNKRDUNK 單卡搜尋 ${w.pid}：${error.message}`);
+    }
+  }
+  if (discovered) await writeJson(p('data', 'watchlist.json'), watchlist, true);
+
   // 先把網頁和既有資料放進 dist，後面再把今天的價格寫進去
   await fs.cp(path.join(CODE_ROOT, 'site'), dist, { recursive: true });
   await fs.cp(p('data'), path.join(dist, 'data'), { recursive: true });
@@ -212,7 +228,9 @@ async function main() {
     if (!info) {
       const old = previous.items?.[pid] || {};
       latest.items[pid] = { pid, cat: w.cat, name: w.name || old.name || `#${pid}`, group: old.group || '', zh: w.zh || '',
-        missing: !japan?.selected, japan, comparisons: comparisonResult?.comparisons, spark: hist.points.slice(-SPARK_POINTS).map((x) => x[1]) };
+        missing: !japan?.selected, japan, comparisons: comparisonResult?.comparisons,
+        comparisonLookup: lookupResults.get(pid) || old.comparisonLookup,
+        spark: hist.points.slice(-SPARK_POINTS).map((x) => x[1]) };
       console.warn(`追蹤清單的商品 ${pid} 在來源裡找不到`);
       continue;
     }
@@ -227,7 +245,8 @@ async function main() {
       prices: usdResult.prices, usdQuote, sub: primary ? primary[0] : '', market: primary ? primary[1] : null, low: primary ? primary[2] : null,
       prev: pts.length > 1 ? pts[pts.length - 2][1] : null,
       spark: pts.slice(-SPARK_POINTS).map((x) => x[1]),
-      japan, comparisons: comparisonResult?.comparisons, date: usdQuote.date || today,
+      japan, comparisons: comparisonResult?.comparisons,
+      comparisonLookup: lookupResults.get(pid) || previous.items?.[pid]?.comparisonLookup, date: usdQuote.date || today,
     };
   }
   for (const dir of dataDirs) await writeJson(path.join(dir, 'latest.json'), latest, true);

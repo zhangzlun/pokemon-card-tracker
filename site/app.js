@@ -107,7 +107,7 @@
         key: "p" + pid, type: "tracked", pid: pid, cat: Number(src.cat || w.cat),
         name: src.name || w.name || ("#" + pid), zh: w.zh || "", group: src.group || "", number: src.number || "", sub: src.sub || "",
         market: src.market, low: src.low, usdQuote: src.usdQuote, comparisons: src.comparisons, comparisonConfig: "comparisons" in w ? w.comparisons : state.comparisonDefaults[pid] || null,
-        sealed: !!src.sealed, prev: L ? L.prev : null, spark: (L && L.spark) || [], prices: src.prices || [],
+        sealed: !!src.sealed, comparisonLookup: src.comparisonLookup, prev: L ? L.prev : null, spark: (L && L.spark) || [], prices: src.prices || [],
         japan: src.japan || null, japanConfig: "japan" in w ? w.japan : state.sourceDefaults[pid] || null,
         waiting: !L || !!L.missing
       });
@@ -452,7 +452,7 @@
     return { node: el("div", { class: "detail" }, chartBox, side, el("div", { class: "full" }, form),
       it.type === "tracked" && state.config.local ? renderAlerts(it) : null,
       it.cat === 85 && it.type !== "manual" ? renderJapanConfig(it) : null,
-      it.type === "tracked" && !it.sealed ? renderSingleConfig(it) : null,
+      it.type === "tracked" && (!it.sealed || it.cat === 3) ? renderComparisonConfig(it) : null,
       el("div", { class: "full" }, actions, msg)), chartBox: chartBox };
   }
 
@@ -515,30 +515,36 @@
     });
     (data.errors || []).forEach(function (e) {
       if (!(data.quotes || []).some(function (q) { return q.name === e.name && q.stale; }))
-        fact(e.name, e.message === "A 與 PSA10 都沒有有效掛價" ? "目前沒有 A／PSA10 掛價" : "更新失敗：" + e.message);
+        fact(e.name, e.message === "A 與 PSA10 都沒有有效掛價" ? "目前沒有 A／PSA10 掛價" :
+          e.message.includes("目前沒有新品掛價") ? "目前沒有新品掛價" : "更新失敗：" + e.message);
     });
     (data.links || []).forEach(function (l) {
       fact(l.name, el("span", null, l.note + " ", el("a", { href: l.url, target: "_blank", rel: "noopener noreferrer", text: "來源頁" })));
     });
   }
 
-  function renderSingleConfig(it) {
+  function renderComparisonConfig(it) {
     var config = it.comparisonConfig || {};
-    var source = (config.sources || []).find(function (s) { return s.source === "snkrdunk-single" || s.source === "snkrdunk-used"; });
+    var source = (config.sources || []).find(function (s) { return it.sealed ? s.source === "snkrdunk-sealed" : s.source === "snkrdunk-single" || s.source === "snkrdunk-used"; });
     var url = el("input", { type: "url", placeholder: "https://snkrdunk.com/apparels/…", value: source ? "https://snkrdunk.com/apparels/" + source.apparelId : "" });
     var msg = el("div", { role: "status" });
-    var button = el("button", { class: "btn", type: "submit", text: "儲存單卡來源並抓價" });
-    var form = el("form", { class: "form" }, el("label", null, "SNKRDUNK 同一張單卡商品網址", url), button);
+    var button = el("button", { class: "btn", type: "submit", text: "儲存 SNKRDUNK 來源並抓價" });
+    var retry = !source && state.config.local ? el("button", { class: "btn", type: "button", text: "重新搜尋 SNKRDUNK" }) : null;
+    if (retry) retry.addEventListener("click", function () {
+      retry.disabled = true; msg.textContent = it.sealed ? "搜尋同系列、同包裝商品中…" : "搜尋同系列、同卡號商品中…";
+      saveLocalWatch({ action: "upsert", entry: { pid: it.pid, cat: it.cat, comparisons: "auto" } }).catch(function (err) { retry.disabled = false; msg.textContent = err.message; });
+    });
+    var form = el("form", { class: "form" }, el("label", null, it.sealed ? "SNKRDUNK 同款包裝商品網址" : "SNKRDUNK 同一張單卡商品網址", url), button, retry);
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var value = url.value.trim();
       var match = /^https:\/\/snkrdunk\.com\/(?:en\/)?(?:trading-cards|apparels)\/([1-9]\d*)\/?$/.exec(value);
-      if (value && !match) { msg.textContent = "請貼上 SNKRDUNK 的單卡商品網址。"; return; }
-      var comparison = { sources: (config.sources || []).filter(function (s) { return s.source !== "snkrdunk-single" && s.source !== "snkrdunk-used"; }), links: config.links || [] };
-      if (match) comparison.sources.push({ source: "snkrdunk-single", apparelId: Number(match[1]), size: "1枚" });
+      if (value && !match) { msg.textContent = "請貼上 SNKRDUNK 的商品網址。"; return; }
+      var comparison = { sources: (config.sources || []).filter(function (s) { return !["snkrdunk-single", "snkrdunk-used", "snkrdunk-sealed"].includes(s.source); }), links: config.links || [] };
+      if (match) comparison.sources.push({ source: it.sealed ? "snkrdunk-sealed" : "snkrdunk-single", apparelId: Number(match[1]), size: it.sealed ? "1個" : "1枚" });
       var entry = { pid: it.pid, cat: it.cat, comparisons: comparison.sources.length || comparison.links.length ? comparison : null };
       if (state.config.local) {
-        button.disabled = true; msg.textContent = "儲存並抓取 A／PSA10 中…";
+        button.disabled = true; msg.textContent = it.sealed ? "儲存並抓取新品最低掛價中…" : "儲存並抓取 A／PSA10 中…";
         saveLocalWatch({ action: "upsert", entry: entry }).catch(function (err) { button.disabled = false; msg.textContent = err.message; });
       } else if (!state.local.token || !state.config.repo) {
         manualInstruction(msg, JSON.stringify(entry, null, 2), "以這筆取代原商品資料，貼入");
@@ -547,14 +553,15 @@
         editWatchlist(function (json) {
           var existing = json.items.find(function (w) { return Number(w.pid) === it.pid; });
           if (existing) existing.comparisons = entry.comparisons;
-        }, "Configure SNKRDUNK single-card source for " + it.name).then(function () {
-          button.disabled = false; msg.textContent = "已儲存。下次更新後顯示 A／PSA10 掛價。";
+        }, "Configure SNKRDUNK source for " + it.name).then(function () {
+          button.disabled = false; msg.textContent = "已儲存。下次更新後顯示 SNKRDUNK 掛價。";
         }, function (err) { button.disabled = false; msg.textContent = err.message; });
       }
     });
     return el("details", { class: "full source-config", open: !source },
-      el("summary", { text: source ? "單卡 SNKRDUNK 來源（已設定）" : "設定單卡 SNKRDUNK 來源" }),
-      el("p", { class: "hint", text: "請確認卡名與卡號一致。只讀取 A 和 PSA10 的最低掛價；沒有掛價時會顯示原因。" }), form, msg);
+      el("summary", { text: source ? "SNKRDUNK 來源（已設定）" : "設定 SNKRDUNK 來源" }),
+      el("p", { class: "hint", text: it.sealed ? "加入商品時會依系列與包裝自動找唯一對應；找不到時可貼網址。只讀取單件新品最低掛價。" :
+        "加入單卡時會依系列代碼與卡號自動找唯一對應；找不到時可貼網址。只讀取 A 和 PSA10 的最低掛價。" }), form, msg);
   }
 
   function renderJapanConfig(it) {
@@ -704,6 +711,7 @@
       var singleQuotes = it.comparisons && it.comparisons.quotes || [];
       var aQuote = singleQuotes.find(function (q) { return q.name === "SNKRDUNK" && q.metric === "a" && isNum(q.price); });
       var psa10Quote = singleQuotes.find(function (q) { return q.name === "SNKRDUNK" && q.metric === "psa10" && isNum(q.price); });
+      var sealedQuote = singleQuotes.find(function (q) { return q.name === "SNKRDUNK" && q.metric === "sealed" && isNum(q.price); });
       var singleError = it.comparisons && (it.comparisons.errors || []).find(function (e) { return e.name === "SNKRDUNK"; });
       function conditionLine(label, q) {
         return q ? el("div", { class: "condition-price", text: label + " " + yen(q.price) + "（約 " + fmt(q.price * jpyRate()) + " 元）" + (q.stale ? " · 舊報價" : "") }) : null;
@@ -738,8 +746,9 @@
             it.jpy != null ? yen(it.jpy) + " " + (it.jpyAuto ? SOURCE_NAMES[it.quote.source] + (it.quote.stale ? " · " + ymd(it.quote.date) + " 舊報價" : "") : "自填") + " "
               : (it.japanConfig ? "日本來源尚無報價" : it.usd != null ? usd(it.usd) + (it.cat === 85 ? " 美國市場價 " : " ") : ""),
             (it.jpyAuto || it.jpy == null) && chg != null ? el("span", { class: "dir " + dirOf(chg), text: glyph(dirOf(chg)) + " " + pct(chg) }) : null),
-          conditionLine("SNKRDUNK A", aQuote), conditionLine("PSA10", psa10Quote),
-          singleError && !aQuote && !psa10Quote ? el("div", { class: "condition-price", text: singleError.message === "A 與 PSA10 都沒有有效掛價" ? "SNKRDUNK：目前無 A／PSA10 掛價" : "SNKRDUNK：抓價失敗" }) : null),
+          conditionLine("SNKRDUNK A", aQuote), conditionLine("PSA10", psa10Quote), conditionLine("SNKRDUNK 新品", sealedQuote),
+          singleError && !aQuote && !psa10Quote && !sealedQuote ? el("div", { class: "condition-price", text: singleError.message === "A 與 PSA10 都沒有有效掛價" ? "SNKRDUNK：目前無 A／PSA10 掛價" : singleError.message.includes("目前沒有新品掛價") ? "SNKRDUNK：目前無新品掛價" : "SNKRDUNK：抓價失敗" }) : null,
+          it.type === "tracked" && (!it.sealed || it.cat === 3) && !it.comparisonConfig ? el("div", { class: "condition-price", text: it.comparisonLookup && it.comparisonLookup.status === "failed" ? "SNKRDUNK：搜尋失敗，請展開重試" : "SNKRDUNK：未找到唯一對應，請展開設定" }) : null),
         el("div", { class: "cell-r" },
           pl != null ? el("div", { class: "pl dir " + dirOf(pl), text: glyph(dirOf(pl)) + " " + signed(pl) }) : el("div", { class: "price none", text: "—" }),
           el("div", { class: "small", text: pl != null && plPct != null ? "單價 " + pct(plPct) : (it.qty > 0 ? "" : "未填持有") })),

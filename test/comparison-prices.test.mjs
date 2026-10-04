@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { comparisonConfigs, parseSingleConditions, parseBuyback, updateComparisons } from '../scripts/comparison-prices.mjs';
+import { comparisonConfigs, findSealedProduct, findSingleProduct, parseSingleConditions, parseBuyback, updateComparisons } from '../scripts/comparison-prices.mjs';
 
 const config = { sources: [{ source: 'snkrdunk-single', apparelId: 146897, size: '1枚' },
   { source: 'pricebase-buyback', url: 'https://price-base.com/useful/gogh-pikachu', cardName: 'pikachu with grey felt hat', cardNumber: '085' }] };
@@ -24,6 +24,47 @@ test('single cards use only exact A and PSA10 conditions, never cheaper B or PSA
   assert.throws(() => parseSingleConditions({ chips: [conditions.chips[0], conditions.chips[0]] }));
   assert.deepEqual(parseSingleConditions({ chips: [{ ...conditions.chips[0], hasListing: false }, conditions.chips[3]] }).map((q) => q.metric), ['psa10']);
   assert.throws(() => comparisonConfigs({ sources: [{ ...config.sources[0], size: '2枚' }] }));
+});
+
+test('single-card search requires one exact set, number and language match', () => {
+  const tile = (id, label) => `<a href="https://snkrdunk.com/apparels/${id}" class="tile" aria-label="${label} - ¥42,000">`;
+  const html = tile(455596, 'ブラッキーex SAR [SV8a 217/187]') + tile(455596, 'ブラッキーex SAR [SV8a 217/187]') +
+    tile(999111, 'ブラッキーex SAR [SV8aF 217/187]【中国語版】') + tile(999222, '別のカード [SV8a 217/187]【英語版】');
+  assert.equal(findSingleProduct(html, { cat: 85, number: '217/187', abbr: 'SV8a' }), 455596);
+  assert.equal(findSingleProduct(html + tile(999333, '別の商品 [SV8a 217/187]'), { cat: 85, number: '217/187', abbr: 'SV8a' }), null);
+  assert.equal(findSingleProduct(tile(738210, 'リザードンGX P [SM60]【英語版】'), { cat: 3, number: 'SM60', abbr: 'SMP' }), 738210);
+  assert.equal(findSingleProduct(tile(738210, 'リザードンGX P [SM60]'), { cat: 3, number: 'SM60', abbr: 'SMP' }), null);
+});
+
+test('sealed search distinguishes standard box, bundle box, display and individual pack', () => {
+  const tile = (id, label) => `<a href="https://snkrdunk.com/apparels/${id}" class="tile" aria-label="${label} - ¥20,000">`;
+  const html = tile(882798, 'ポケモンカードゲームMEGA(英語版) エリートトレーナーボックス「30th CELEBRATION」') +
+    tile(999000, 'ポケモンカードゲームMEGA(英語版) ポケモンセンター エリートトレーナーボックス「30th CELEBRATION」') +
+    tile(893600, 'ポケモンカードゲームMEGA(英語版) ブースターバンドル「30th CELEBRATION」ボックス') +
+    tile(893601, 'ポケモンカードゲームMEGA(英語版) ブースターバンドル「30th CELEBRATION」パック') +
+    tile(903937, 'ポケモンカードゲームMEGA(英語版) ミニティン ディスプレイボックス「30th CELEBRATION」') +
+    tile(883008, 'ポケモンカードゲームMEGA(英語版) 2パックブリスター「30th CELEBRATION」') +
+    tile(998000, 'イーブイ C [30th EN 116/128]【英語版】(2パックブリスター「30th CELEBRATION」)');
+  const card = (name) => ({ cat: 3, sealed: 1, name, group: 'ME: 30th Celebration' });
+  assert.equal(findSealedProduct(html, card('30th Celebration Elite Trainer Box')), 882798);
+  assert.equal(findSealedProduct(html, card('30th Celebration Booster Bundle')), 893600);
+  assert.equal(findSealedProduct(html, card('30th Celebration Mini Tin Display')), 903937);
+  assert.equal(findSealedProduct(html, card('30th Celebration 2-Pack Blister')), 883008);
+  assert.equal(findSealedProduct(html + tile(777777, 'ポケモンカードゲームMEGA(英語版) 2パックブリスター「30th CELEBRATION」'), card('30th Celebration 2-Pack Blister')), null);
+});
+
+test('sealed SNKRDUNK comparison uses only one unopened unit and keeps A/PSA quotes separate', async () => {
+  const config = { sources: [{ source: 'snkrdunk-sealed', apparelId: 893600, size: '1個' }] };
+  const result = await updateComparisons({ config, date: '2026-10-04', updated: '2026-10-04T05:00:00Z', warn: () => {},
+    fetchImpl: async (url) => {
+      assert.equal(url, 'https://snkrdunk.com/v1/apparels/893600/sizes');
+      return Response.json({ sizePrices: [
+        { size: { localizedName: '1個', isDeleted: false }, minNewListingPrice: 22000 },
+        { size: { localizedName: '2個', isDeleted: false }, minNewListingPrice: 44000 }
+      ] });
+    } });
+  assert.deepEqual(result.comparisons.quotes.map((q) => [q.metric, q.price, q.condition]), [['sealed', 22000, '未拆封・1個']]);
+  assert.throws(() => comparisonConfigs({ sources: [{ ...config.sources[0], size: '2個' }] }));
 });
 
 test('buyback references require exact card identity and dated table; sealed, opened and PSA are never mixed', () => {
