@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-04",
+  "updated": "2026-10-04T03:43:45.515Z",
+  "fx": {
+    "TWD": 31.854,
+    "JPY": 157.82
+  },
+  "items": {
+    "518861": {
+      "pid": 518861,
+      "cat": 3,
+      "name": "Pikachu with Grey Felt Hat",
+      "zh": "梵谷皮卡丘",
+      "group": "SV: Scarlet & Violet Promo Cards",
+      "abbr": "SVP",
+      "number": "085",
+      "sealed": 0,
+      "prices": [
+        [
+          "Normal",
+          1015.89,
+          900
+        ]
+      ],
+      "sub": "Normal",
+      "market": 1015.89,
+      "low": 900,
+      "prev": null,
+      "spark": [
+        1015.89
+      ]
+    },
+    "704143": {
+      "pid": 704143,
+      "cat": 3,
+      "name": "30th Celebration Elite Trainer Box",
+      "zh": "美版 30 週年 ETB",
+      "group": "ME: 30th Celebration",
+      "abbr": "30C",
+      "number": "",
+      "sealed": 1,
+      "prices": [
+        [
+          "Normal",
+          148.36,
+          130
+        ]
+      ],
+      "sub": "Normal",
+      "market": 148.36,
+      "low": 130,
+      "prev": null,
+      "spark": [
+        148.36
+      ]
+    },
+    "704148": {
+      "pid": 704148,
+      "cat": 3,
+      "name": "30th Celebration 2-Pack Blister",
+      "zh": "美版 30 週年 2-Pack Blister",
+      "group": "ME: 30th Celebration",
+      "abbr": "30C",
+      "number": "",
+      "sealed": 1,
+      "prices": [],
+      "sub": "",
+      "market": null,
+      "low": null,
+      "prev": null,
+      "spark": []
+    },
+    "704171": {
+      "pid": 704171,
+      "cat": 3,
+      "name": "30th Celebration Booster Bundle",
+      "zh": "美版 30 週年 Booster Bundle",
+      "group": "ME: 30th Celebration",
+      "abbr": "30C",
+      "number": "",
+      "sealed": 1,
+      "prices": [
+        [
+          "Normal",
+          71.46,
+          68.71
+        ]
+      ],
+      "sub": "Normal",
+      "market": 71.46,
+      "low": 68.71,
+      "prev": null,
+      "spark": [
+        71.46
+      ]
+    },
+    "704186": {
+      "pid": 704186,
+      "cat": 3,
+      "name": "30th Celebration Mini Tin Display",
+      "zh": "美版 30 週年 Mini Tin 整盒",
+      "group": "ME: 30th Celebration",
+      "abbr": "30C",
+      "number": "",
+      "sealed": 1,
+      "prices": [
+        [
+          "Normal",
+          230.27,
+          229.96
+        ]
+      ],
+      "sub": "Normal",
+      "market": 230.27,
+      "low": 229.96,
+      "prev": null,
+      "spark": [
+        230.27
+      ]
+    },
+    "709110": {
+      "pid": 709110,
+      "cat": 85,
+      "name": "Storm Emeralda Booster Box",
+      "zh": "日版烈空 補充盒",
+      "group": "M6: Storm Emeralda",
+      "abbr": "m6",
+      "number": "",
+      "sealed": 1,
+      "prices": [
+        [
+          "Normal",
+          109.66,
+          101.76
+        ]
+      ],
+      "sub": "Normal",
+      "market": 109.66,
+      "low": 101.76,
+      "prev": null,
+      "spark": [
+        109.66
+      ]
+    }
+  }
+}
