@@ -69,6 +69,8 @@ npm start
 
 `npm start` 會先抓一次資料（約半分鐘），再啟動本機網站，網址是 <http://localhost:5173>。
 
+macOS 也可以在 Finder 裡對 `start.command` 按兩下，效果相同，還會自動開啟瀏覽器。
+
 | 指令 | 作用 |
 |---|---|
 | `npm run update:local` | 抓資料、產生 `dist/`，不改動儲存庫裡的 `data/` |
