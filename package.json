@@ -1,0 +1,12 @@
+{
+  "name": "pokemon-card-tracker",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "update": "node scripts/update.mjs",
+    "update:local": "node scripts/update.mjs --local",
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/update.mjs --local && node scripts/dev.mjs"
+  }
+}

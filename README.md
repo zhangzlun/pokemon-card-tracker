@@ -19,6 +19,7 @@
 ```
 .github/workflows/update.yml   每天 21:30 UTC（台北 05:30）執行，也可以手動執行
 scripts/update.mjs             抓商品與價格、寫入每日紀錄、組出網站
+scripts/dev.mjs                本機開發用的靜態伺服器
 data/watchlist.json            要每天記錄走勢的商品清單
 data/aliases.json              中文暱稱對照表（搜尋用）
 data/history/<商品編號>.json    每日價格紀錄（由 Actions 自動提交）
@@ -61,9 +62,23 @@ site/                          網頁本體（HTML、CSS、JS，沒有建置步�
 需要 Node.js 20 以上，不用安裝任何套件。
 
 ```bash
-node scripts/update.mjs        # 抓資料並產生 dist/
-npx serve dist                 # 或任何靜態檔案伺服器
+git clone https://github.com/zhangzlun/pokemon-card-tracker.git
+cd pokemon-card-tracker
+npm start
 ```
+
+`npm start` 會先抓一次資料（約半分鐘），再啟動本機網站，網址是 <http://localhost:5173>。
+
+| 指令 | 作用 |
+|---|---|
+| `npm run update:local` | 抓資料、產生 `dist/`，不改動儲存庫裡的 `data/` |
+| `npm run dev` | 啟動本機網站。網頁檔案直接讀 `site/`，改了存檔、重新整理就看得到 |
+| `npm start` | 上面兩個依序執行 |
+| `npm run update` | 跟 GitHub Actions 跑的一樣，會把今天的價格寫進 `data/history` 和 `data/latest.json` |
+
+平常開發用 `update:local` 就好。`npm run update` 會改到 `data/`，那些檔案每天由 Actions 自動提交，自己再提交一次容易衝突。
+
+要換連接埠：`PORT=8080 npm run dev`。一定要透過本機網站開啟，直接用瀏覽器開 `index.html` 會讀不到資料。
 
 ## 對來源的禮貌
 

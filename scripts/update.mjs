@@ -20,6 +20,9 @@ const CACHE_DAYS = 14;
 const SPARK_POINTS = 30;
 const DEFAULT_FX = { TWD: 31.5, JPY: 150 };
 
+// --local：只產生 dist/，不改動儲存庫裡的 data/history 與 data/latest.json（本機開發用）
+const LOCAL = process.argv.includes('--local');
+
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date());
 const p = (...parts) => path.join(ROOT, ...parts);
 
@@ -158,6 +161,11 @@ async function main() {
     await writeJson(path.join(dist, 'data', `catalog-${cat.key}.json`), built.catalog);
   }
 
+  // 先把網頁和既有資料放進 dist，後面再把今天的價格寫進去
+  await fs.cp(p('site'), dist, { recursive: true });
+  await fs.cp(p('data'), path.join(dist, 'data'), { recursive: true });
+  const dataDirs = LOCAL ? [path.join(dist, 'data')] : [p('data'), path.join(dist, 'data')];
+
   const fx = await loadFx(previous.fx);
   const latest = { date: today, updated: new Date().toISOString(), fx, items: {} };
 
@@ -178,7 +186,7 @@ async function main() {
       else hist.points.push(point);
       hist.name = info.name;
       hist.sub = primary[0];
-      await writeJson(histFile, hist);
+      for (const dir of dataDirs) await writeJson(path.join(dir, 'history', `${pid}.json`), hist);
     }
     const pts = hist.points;
     latest.items[pid] = {
@@ -188,13 +196,9 @@ async function main() {
       spark: pts.slice(-SPARK_POINTS).map((x) => x[1]),
     };
   }
-  await writeJson(p('data', 'latest.json'), latest, true);
-
-  // 組出要部署的網站
-  await fs.cp(p('site'), dist, { recursive: true });
-  await fs.cp(p('data'), path.join(dist, 'data'), { recursive: true });
+  for (const dir of dataDirs) await writeJson(path.join(dir, 'latest.json'), latest, true);
   await writeJson(path.join(dist, 'data', 'config.json'), { repo: REPO });
-  console.log(`完成：追蹤 ${Object.keys(latest.items).length} 項，匯率 1 USD = ${fx.TWD} TWD`);
+  console.log(`完成：追蹤 ${Object.keys(latest.items).length} 項，匯率 1 USD = ${fx.TWD} TWD${LOCAL ? '（本機模式，沒有改動 data/）' : ''}`);
 }
 
 main().catch((err) => {
