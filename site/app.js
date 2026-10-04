@@ -918,7 +918,7 @@
       (state.config.scheduled ? "NAS 模式：每天台北時間 05:30 自動更新；清單及行情儲存在 NAS。持有數量與成本仍保存在各裝置的瀏覽器。" : state.config.local ? "本機模式：加入商品或儲存來源會立即抓取日本報價。每天開啟 npm start 會更新全部行情；本機關閉時不會執行。" : "每天台北時間清晨由 GitHub Actions 自動抓取並重新部署。") + (state.config.repo ? "儲存庫：" + state.config.repo + "。" : "");
     $("githubPanel").hidden = !!state.config.local;
     $("pushPanel").hidden = !state.config.local;
-    $("identifyBtn").hidden = !state.config.identify;
+    if ($("identifyBtn")) $("identifyBtn").hidden = !state.config.identify;
     if (state.config.local) {
       $("pushHint").textContent = !window.isSecureContext ? "iPhone 網站推播需要受信任的 HTTPS 網址。請用 Safari 開啟 NAS 的 HTTPS 網址，加入主畫面後，從主畫面開啟並啟用推播。區網 IP 的 HTTP 網址無法啟用。" :
         "在商品明細設定關注價。iPhone 請先用 Safari 將此 HTTPS 網站加入主畫面，再從主畫面開啟並點「啟用推播」。每天更新後到價才通知。";
@@ -1025,7 +1025,8 @@
     document.querySelectorAll(".seg-btn").forEach(function (b) {
       b.addEventListener("click", function () { setScope(b.getAttribute("data-scope")); runSearch(); });
     });
-    $("identifyFile").addEventListener("change", function () {
+    // 舊版 index.html 沒有辨識按鈕；缺少時只停用此功能，不讓整頁初始化失敗。
+    if ($("identifyFile")) $("identifyFile").addEventListener("change", function () {
       var file = this.files[0];
       this.value = "";
       if (file) identifyImage(file);
