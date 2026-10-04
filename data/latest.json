@@ -1,6 +1,6 @@
 {
   "date": "2026-10-04",
-  "updated": "2026-10-04T04:04:38.629Z",
+  "updated": "2026-10-04T10:36:32.209Z",
   "fx": {
     "TWD": 31.854,
     "JPY": 157.82
@@ -22,13 +22,100 @@
           900
         ]
       ],
+      "usdQuote": {
+        "source": "tcgcsv",
+        "date": "2026-10-04",
+        "stale": false
+      },
       "sub": "Normal",
       "market": 1015.89,
       "low": 900,
       "prev": null,
       "spark": [
         1015.89
-      ]
+      ],
+      "comparisons": {
+        "quotes": [
+          {
+            "metric": "a",
+            "price": 159999,
+            "kind": "listing",
+            "label": "A 等級最低掛價",
+            "condition": "未鑑定單卡・A",
+            "key": "snkrdunk:146897:condition:a",
+            "sourceKey": "snkrdunk:146897:condition",
+            "name": "SNKRDUNK",
+            "url": "https://snkrdunk.com/apparels/146897",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "stale": false
+          },
+          {
+            "metric": "psa10",
+            "price": 436000,
+            "kind": "listing",
+            "label": "PSA10 最低掛價",
+            "condition": "PSA10 鑑定卡",
+            "key": "snkrdunk:146897:condition:psa10",
+            "sourceKey": "snkrdunk:146897:condition",
+            "name": "SNKRDUNK",
+            "url": "https://snkrdunk.com/apparels/146897",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "stale": false
+          },
+          {
+            "metric": "sealed",
+            "price": 130000,
+            "kind": "buyback",
+            "label": "買取參考上限",
+            "condition": "未拆封",
+            "priceAsOf": "2026-10",
+            "sourceUpdated": "2026-10-01",
+            "key": "pricebase:/useful/gogh-pikachu:buyback:sealed",
+            "sourceKey": "pricebase:/useful/gogh-pikachu:buyback",
+            "name": "PRICE BASE",
+            "url": "https://price-base.com/useful/gogh-pikachu",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "stale": false
+          },
+          {
+            "metric": "opened",
+            "price": 95000,
+            "kind": "buyback",
+            "label": "買取參考上限",
+            "condition": "已拆、美品",
+            "priceAsOf": "2026-10",
+            "sourceUpdated": "2026-10-01",
+            "key": "pricebase:/useful/gogh-pikachu:buyback:opened",
+            "sourceKey": "pricebase:/useful/gogh-pikachu:buyback",
+            "name": "PRICE BASE",
+            "url": "https://price-base.com/useful/gogh-pikachu",
+            "currency": "JPY",
+            "date": "2026-10-04",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "stale": false
+          }
+        ],
+        "errors": [],
+        "links": [
+          {
+            "name": "PriceCharting",
+            "url": "https://www.pricecharting.com/game/pokemon-promo/pikachu-with-grey-felt-hat-85",
+            "note": "裸卡與各鑑定等級分列；目前自動抓取需網站驗證，請開原站查看"
+          },
+          {
+            "name": "Cardmarket",
+            "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/SV-Black-Star-Promos/Pikachu-with-Grey-Felt-Hat-SVP085",
+            "note": "歐洲市場、歐元報價；目前自動抓取需網站驗證，請開原站查看"
+          }
+        ]
+      },
+      "date": "2026-10-04"
     },
     "704143": {
       "pid": 704143,
@@ -46,13 +133,19 @@
           130
         ]
       ],
+      "usdQuote": {
+        "source": "tcgcsv",
+        "date": "2026-10-04",
+        "stale": false
+      },
       "sub": "Normal",
       "market": 148.36,
       "low": 130,
       "prev": null,
       "spark": [
         148.36
-      ]
+      ],
+      "date": "2026-10-04"
     },
     "704148": {
       "pid": 704148,
@@ -63,12 +156,30 @@
       "abbr": "30C",
       "number": "",
       "sealed": 1,
-      "prices": [],
-      "sub": "",
-      "market": null,
+      "prices": [
+        [
+          "Normal",
+          56.74,
+          null
+        ]
+      ],
+      "usdQuote": {
+        "source": "tcgplayer",
+        "printing": "Normal",
+        "price": 56.74,
+        "url": "https://www.tcgplayer.com/product/704148",
+        "date": "2026-10-04",
+        "fetchedAt": "2026-10-04T10:36:32.209Z",
+        "stale": false
+      },
+      "sub": "Normal",
+      "market": 56.74,
       "low": null,
       "prev": null,
-      "spark": []
+      "spark": [
+        56.74
+      ],
+      "date": "2026-10-04"
     },
     "704171": {
       "pid": 704171,
@@ -86,13 +197,19 @@
           68.71
         ]
       ],
+      "usdQuote": {
+        "source": "tcgcsv",
+        "date": "2026-10-04",
+        "stale": false
+      },
       "sub": "Normal",
       "market": 71.46,
       "low": 68.71,
       "prev": null,
       "spark": [
         71.46
-      ]
+      ],
+      "date": "2026-10-04"
     },
     "704186": {
       "pid": 704186,
@@ -110,13 +227,19 @@
           229.96
         ]
       ],
+      "usdQuote": {
+        "source": "tcgcsv",
+        "date": "2026-10-04",
+        "stale": false
+      },
       "sub": "Normal",
       "market": 230.27,
       "low": 229.96,
       "prev": null,
       "spark": [
         230.27
-      ]
+      ],
+      "date": "2026-10-04"
     },
     "709110": {
       "pid": 709110,
@@ -134,13 +257,191 @@
           101.76
         ]
       ],
+      "usdQuote": {
+        "source": "tcgcsv",
+        "date": "2026-10-04",
+        "stale": false
+      },
       "sub": "Normal",
       "market": 109.66,
       "low": 101.76,
       "prev": null,
       "spark": [
         109.66
-      ]
+      ],
+      "japan": {
+        "preferred": "snkrdunk",
+        "selected": "snkrdunk",
+        "quotes": {
+          "snkrdunk": {
+            "source": "snkrdunk",
+            "key": "snkrdunk:846048:1個",
+            "url": "https://snkrdunk.com/apparels/846048",
+            "currency": "JPY",
+            "price": 9550,
+            "kind": "listing",
+            "label": "新品最低掛價（1個）",
+            "variant": "1個",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "date": "2026-10-04",
+            "stale": false
+          },
+          "pricebase": {
+            "source": "pricebase",
+            "key": "pricebase:/useful/stormemeralda-box-market",
+            "url": "https://price-base.com/useful/stormemeralda-box-market",
+            "currency": "JPY",
+            "price": 9700,
+            "kind": "reference",
+            "label": "取引相場參考價",
+            "sourceUpdated": "2026-10-03",
+            "priceAsOf": "2026-10",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "date": "2026-10-04",
+            "stale": false
+          }
+        },
+        "historyChoices": [
+          {
+            "key": "snkrdunk:846048:1個:trades",
+            "source": "snkrdunk",
+            "label": "成交相場（1個）",
+            "kind": "trades",
+            "fetchedDate": "2026-10-04",
+            "error": null
+          },
+          {
+            "key": "snkrdunk:846048:1個",
+            "source": "snkrdunk",
+            "label": "新品最低掛價（1個）",
+            "kind": "snapshot",
+            "error": null
+          },
+          {
+            "key": "pricebase:/useful/stormemeralda-box-market:published",
+            "source": "pricebase",
+            "label": "文章公布相場",
+            "kind": "published",
+            "fetchedDate": "2026-10-04",
+            "error": null
+          },
+          {
+            "key": "pricebase:/useful/stormemeralda-box-market",
+            "source": "pricebase",
+            "label": "取引相場參考價",
+            "kind": "snapshot",
+            "error": null
+          }
+        ],
+        "historyErrors": {},
+        "chartKey": "snkrdunk:846048:1個:trades",
+        "prev": null,
+        "spark": [
+          9550
+        ]
+      },
+      "date": "2026-10-04"
+    },
+    "718620": {
+      "pid": 718620,
+      "cat": 85,
+      "name": "MEGA Expansion 30th Celebration Booster Box",
+      "zh": "",
+      "group": "M6a: MEGA Expansion 30th Celebration",
+      "abbr": "m6a",
+      "number": "",
+      "sealed": 1,
+      "prices": [
+        [
+          "Normal",
+          197.09,
+          190
+        ]
+      ],
+      "usdQuote": {
+        "source": "tcgcsv",
+        "date": "2026-10-04",
+        "stale": false
+      },
+      "sub": "Normal",
+      "market": 197.09,
+      "low": 190,
+      "prev": null,
+      "spark": [
+        197.09
+      ],
+      "japan": {
+        "preferred": "snkrdunk",
+        "selected": "snkrdunk",
+        "quotes": {
+          "snkrdunk": {
+            "source": "snkrdunk",
+            "key": "snkrdunk:881421:1個",
+            "url": "https://snkrdunk.com/apparels/881421",
+            "currency": "JPY",
+            "price": 25900,
+            "kind": "listing",
+            "label": "新品最低掛價（1個）",
+            "variant": "1個",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "date": "2026-10-04",
+            "stale": false
+          },
+          "pricebase": {
+            "source": "pricebase",
+            "key": "pricebase:/useful/30thcelebration-market",
+            "url": "https://price-base.com/useful/30thcelebration-market",
+            "currency": "JPY",
+            "price": 26000,
+            "kind": "reference",
+            "label": "取引相場參考價",
+            "sourceUpdated": "2026-10-02",
+            "priceAsOf": "2026-10",
+            "fetchedAt": "2026-10-04T10:36:32.209Z",
+            "date": "2026-10-04",
+            "stale": false
+          }
+        },
+        "historyChoices": [
+          {
+            "key": "snkrdunk:881421:1個:trades",
+            "source": "snkrdunk",
+            "label": "成交相場（1個）",
+            "kind": "trades",
+            "fetchedDate": "2026-10-04",
+            "error": null
+          },
+          {
+            "key": "snkrdunk:881421:1個",
+            "source": "snkrdunk",
+            "label": "新品最低掛價（1個）",
+            "kind": "snapshot",
+            "error": null
+          },
+          {
+            "key": "pricebase:/useful/30thcelebration-market:published",
+            "source": "pricebase",
+            "label": "文章公布相場",
+            "kind": "published",
+            "fetchedDate": "2026-10-04",
+            "error": null
+          },
+          {
+            "key": "pricebase:/useful/30thcelebration-market",
+            "source": "pricebase",
+            "label": "取引相場參考價",
+            "kind": "snapshot",
+            "error": null
+          }
+        ],
+        "historyErrors": {},
+        "chartKey": "snkrdunk:881421:1個:trades",
+        "prev": null,
+        "spark": [
+          25900
+        ]
+      },
+      "date": "2026-10-04"
     }
   }
 }
