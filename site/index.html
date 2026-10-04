@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>卡牌行情</title>
+<meta name="description" content="寶可夢卡牌與未拆商品的每日行情追蹤，資料來自 TCGplayer。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1>卡牌行情</h1>
+      <p class="sub" id="syncText">讀取中…</p>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="頁面">
+      <button class="tab" role="tab" id="tabbtn-list" aria-controls="tab-list" aria-selected="true" type="button">我的清單</button>
+      <button class="tab" role="tab" id="tabbtn-search" aria-controls="tab-search" aria-selected="false" type="button">搜尋</button>
+      <button class="tab" role="tab" id="tabbtn-settings" aria-controls="tab-settings" aria-selected="false" type="button">設定</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-list" role="tabpanel" aria-labelledby="tabbtn-list">
+      <div class="summary" id="summary" aria-label="總覽"></div>
+      <div class="board" id="board" aria-label="我的清單"></div>
+    </section>
+
+    <section id="tab-search" role="tabpanel" aria-labelledby="tabbtn-search" hidden>
+      <form class="searchbar" id="searchForm" autocomplete="off">
+        <label class="visually-hidden" for="q">搜尋卡片或商品</label>
+        <input id="q" type="search" placeholder="卡名、編號或中文暱稱，例如：梵谷皮卡丘、Charizard 199、30週年 ETB">
+        <div class="seg" role="radiogroup" aria-label="版本">
+          <button type="button" class="seg-btn" role="radio" data-scope="en" aria-checked="true">美版</button>
+          <button type="button" class="seg-btn" role="radio" data-scope="jp" aria-checked="false">日版</button>
+        </div>
+      </form>
+      <p class="hint" id="searchHint">輸入關鍵字開始搜尋。價格是 TCGplayer 的市價（美元），旁邊是換算的台幣。</p>
+      <div class="board" id="results" hidden></div>
+    </section>
+
+    <section id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings" hidden>
+      <div class="panel">
+        <h2>新增手動商品</h2>
+        <p class="hint">來源沒有的商品（例如繁中版）可以自己填價格，會算進總值，但不會自動更新。</p>
+        <form class="form" id="manualForm">
+          <label>名稱<input id="m-name" required maxlength="80" placeholder="例如：繁中 30 週年 擴充包 BOX"></label>
+          <label>版本
+            <select id="m-edition"><option>繁中</option><option>日版</option><option>美版</option><option>其他</option></select>
+          </label>
+          <label>數量<input id="m-qty" type="number" min="0" step="1" inputmode="numeric" value="1"></label>
+          <label>成本單價（台幣）<input id="m-cost" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label>目前行情單價（台幣）<input id="m-price" type="number" min="0" step="1" inputmode="numeric"></label>
+          <button class="btn primary" type="submit">新增</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>備份與還原</h2>
+        <p class="hint">持有數量、成本和手動商品只存在這個瀏覽器裡，不會上傳。換裝置或清除瀏覽器資料前，請先匯出。</p>
+        <div class="row-actions">
+          <button class="btn" type="button" id="exportBtn">匯出我的資料</button>
+          <label class="btn file-btn">匯入資料<input id="importFile" type="file" accept="application/json,.json"></label>
+        </div>
+        <p class="hint" id="backupMsg" role="status"></p>
+      </div>
+
+      <div class="panel">
+        <h2>從網頁直接加入每日紀錄（選用）</h2>
+        <p class="hint">每日紀錄的清單存在儲存庫的 <code>data/watchlist.json</code>。填入只限這個儲存庫、有 Contents 讀寫權限的 fine-grained token 後，就能在網頁上直接加入或移除。Token 只存在這個瀏覽器。不填也可以，改成自己編輯那個檔案。</p>
+        <form class="form" id="tokenForm">
+          <label>GitHub token<input id="token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
+          <button class="btn primary" type="submit">儲存</button>
+          <button class="btn" type="button" id="tokenClear">清除</button>
+        </form>
+        <p class="hint" id="tokenMsg" role="status"></p>
+      </div>
+
+      <div class="panel">
+        <h2>資料來源</h2>
+        <p class="hint" id="sourceText"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>價格是 TCGplayer 的市價（依美國市場近期成交計算），由 <a href="https://tcgcsv.com/" target="_blank" rel="noopener noreferrer">tcgcsv.com</a> 每日彙整；台幣是用當日匯率換算的參考值，不代表在台灣實際賣得掉的價格。</p>
+    <p>漲跌顏色採台灣慣例：紅色上漲、綠色下跌。</p>
+  </footer>
+</div>
+<script src="app.js" defer></script>
+</body>
+</html>

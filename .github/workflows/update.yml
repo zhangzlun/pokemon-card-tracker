@@ -1,0 +1,69 @@
+name: Update prices and deploy
+
+on:
+  schedule:
+    # 每天 21:30 UTC（台北時間 05:30）。來源 tcgcsv 大約在 20:00 UTC 更新。
+    - cron: "30 21 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/**"
+      - "data/watchlist.json"
+      - "data/aliases.json"
+      - ".github/workflows/update.yml"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # 商品清單很少變動，快取起來可以少抓一半的請求
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: products-${{ github.run_id }}
+          restore-keys: products-
+
+      - name: Fetch prices and build site
+        run: node scripts/update.mjs
+
+      - name: Commit price history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history data/latest.json
+          if git diff --cached --quiet; then
+            echo "沒有變動"
+          else
+            git commit -m "Update prices $(TZ=Asia/Taipei date +%F)"
+            git pull --rebase --autostash
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
