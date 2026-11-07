@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-06",
-  "updated": "2026-11-06T01:42:02.930Z",
+  "date": "2026-11-07",
+  "updated": "2026-11-07T01:01:51.083Z",
   "fx": {
     "TWD": 33.052,
     "JPY": 157.84
@@ -24,15 +24,14 @@
       ],
       "usdQuote": {
         "source": "tcgcsv",
-        "date": "2026-11-06",
+        "date": "2026-11-07",
         "stale": false
       },
       "sub": "Normal",
       "market": 932.81,
       "low": 765,
-      "prev": 971,
+      "prev": 932.81,
       "spark": [
-        1015.89,
         1015.89,
         1015.89,
         1015.89,
@@ -61,13 +60,14 @@
         976.56,
         976.56,
         971,
+        932.81,
         932.81
       ],
       "comparisons": {
         "quotes": [
           {
             "metric": "a",
-            "price": 151000,
+            "price": 149000,
             "kind": "listing",
             "label": "A 等級最低掛價",
             "condition": "未鑑定單卡・A",
@@ -76,8 +76,8 @@
             "name": "SNKRDUNK",
             "url": "https://snkrdunk.com/apparels/146897",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           },
           {
@@ -91,8 +91,8 @@
             "name": "SNKRDUNK",
             "url": "https://snkrdunk.com/apparels/146897",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           },
           {
@@ -108,8 +108,8 @@
             "name": "PRICE BASE",
             "url": "https://price-base.com/useful/gogh-pikachu",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           },
           {
@@ -125,8 +125,8 @@
             "name": "PRICE BASE",
             "url": "https://price-base.com/useful/gogh-pikachu",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           }
         ],
@@ -144,7 +144,7 @@
           }
         ]
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     },
     "704143": {
       "pid": 704143,
@@ -158,21 +158,20 @@
       "prices": [
         [
           "Normal",
-          111.5,
+          104.92,
           89
         ]
       ],
       "usdQuote": {
         "source": "tcgcsv",
-        "date": "2026-11-06",
+        "date": "2026-11-07",
         "stale": false
       },
       "sub": "Normal",
-      "market": 111.5,
+      "market": 104.92,
       "low": 89,
-      "prev": 113.7,
+      "prev": 111.5,
       "spark": [
-        145.22,
         142.17,
         138.55,
         139.71,
@@ -201,13 +200,14 @@
         119.37,
         116.6,
         113.7,
-        111.5
+        111.5,
+        104.92
       ],
       "comparisons": {
         "quotes": [
           {
             "metric": "sealed",
-            "price": 32500,
+            "price": 31200,
             "kind": "listing",
             "label": "新品最低掛價（1個）",
             "variant": "1個",
@@ -217,8 +217,8 @@
             "name": "SNKRDUNK",
             "url": "https://snkrdunk.com/apparels/882798",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           }
         ],
@@ -227,9 +227,9 @@
       },
       "comparisonLookup": {
         "status": "matched",
-        "date": "2026-11-06"
+        "date": "2026-11-07"
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     },
     "704148": {
       "pid": 704148,
@@ -252,8 +252,8 @@
         "printing": "Normal",
         "price": 58.2,
         "url": "https://www.tcgplayer.com/product/704148",
-        "date": "2026-11-06",
-        "fetchedAt": "2026-11-06T01:42:02.930Z",
+        "date": "2026-11-07",
+        "fetchedAt": "2026-11-07T01:01:51.083Z",
         "stale": false
       },
       "sub": "Normal",
@@ -261,7 +261,6 @@
       "low": null,
       "prev": 58.2,
       "spark": [
-        56.74,
         56.74,
         56.74,
         56.74,
@@ -290,6 +289,7 @@
         59.71,
         58.2,
         58.2,
+        58.2,
         58.2
       ],
       "comparisons": {
@@ -306,8 +306,8 @@
             "name": "SNKRDUNK",
             "url": "https://snkrdunk.com/apparels/883008",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           }
         ],
@@ -316,9 +316,9 @@
       },
       "comparisonLookup": {
         "status": "matched",
-        "date": "2026-11-06"
+        "date": "2026-11-07"
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     },
     "704171": {
       "pid": 704171,
@@ -332,21 +332,20 @@
       "prices": [
         [
           "Normal",
-          69.27,
-          62.99
+          63.48,
+          60.99
         ]
       ],
       "usdQuote": {
         "source": "tcgcsv",
-        "date": "2026-11-06",
+        "date": "2026-11-07",
         "stale": false
       },
       "sub": "Normal",
-      "market": 69.27,
-      "low": 62.99,
-      "prev": 68.69,
+      "market": 63.48,
+      "low": 60.99,
+      "prev": 69.27,
       "spark": [
-        70.05,
         71.03,
         68.33,
         72.19,
@@ -375,13 +374,14 @@
         72.23,
         67.45,
         68.69,
-        69.27
+        69.27,
+        63.48
       ],
       "comparisons": {
         "quotes": [
           {
             "metric": "sealed",
-            "price": 18300,
+            "price": 17500,
             "kind": "listing",
             "label": "新品最低掛價（1個）",
             "variant": "1個",
@@ -391,8 +391,8 @@
             "name": "SNKRDUNK",
             "url": "https://snkrdunk.com/apparels/893600",
             "currency": "JPY",
-            "date": "2026-11-06",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
+            "date": "2026-11-07",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
             "stale": false
           }
         ],
@@ -401,9 +401,9 @@
       },
       "comparisonLookup": {
         "status": "matched",
-        "date": "2026-11-06"
+        "date": "2026-11-07"
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     },
     "704186": {
       "pid": 704186,
@@ -417,21 +417,20 @@
       "prices": [
         [
           "Normal",
-          233.16,
-          226
+          232.58,
+          224
         ]
       ],
       "usdQuote": {
         "source": "tcgcsv",
-        "date": "2026-11-06",
+        "date": "2026-11-07",
         "stale": false
       },
       "sub": "Normal",
-      "market": 233.16,
-      "low": 226,
-      "prev": 233.4,
+      "market": 232.58,
+      "low": 224,
+      "prev": 233.16,
       "spark": [
-        231.77,
         233.75,
         236.23,
         235.15,
@@ -460,7 +459,8 @@
         232.23,
         232.49,
         233.4,
-        233.16
+        233.16,
+        232.58
       ],
       "comparisons": {
         "quotes": [],
@@ -475,9 +475,9 @@
       },
       "comparisonLookup": {
         "status": "matched",
-        "date": "2026-11-06"
+        "date": "2026-11-07"
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     },
     "709110": {
       "pid": 709110,
@@ -491,21 +491,20 @@
       "prices": [
         [
           "Normal",
-          88.96,
-          85.98
+          88.19,
+          85.38
         ]
       ],
       "usdQuote": {
         "source": "tcgcsv",
-        "date": "2026-11-06",
+        "date": "2026-11-07",
         "stale": false
       },
       "sub": "Normal",
-      "market": 88.96,
-      "low": 85.98,
-      "prev": 89.63,
+      "market": 88.19,
+      "low": 85.38,
+      "prev": 88.96,
       "spark": [
-        107.47,
         106.31,
         103.04,
         100.43,
@@ -534,7 +533,8 @@
         90.13,
         90.33,
         89.63,
-        88.96
+        88.96,
+        88.19
       ],
       "japan": {
         "preferred": "snkrdunk",
@@ -545,12 +545,12 @@
             "key": "snkrdunk:846048:1個",
             "url": "https://snkrdunk.com/apparels/846048",
             "currency": "JPY",
-            "price": 8950,
+            "price": 9200,
             "kind": "listing",
             "label": "新品最低掛價（1個）",
             "variant": "1個",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
-            "date": "2026-11-06",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
+            "date": "2026-11-07",
             "stale": false
           },
           "pricebase": {
@@ -563,8 +563,8 @@
             "label": "取引相場參考價",
             "sourceUpdated": "2026-11-04",
             "priceAsOf": "2026-11",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
-            "date": "2026-11-06",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
+            "date": "2026-11-07",
             "stale": false
           }
         },
@@ -574,7 +574,7 @@
             "source": "snkrdunk",
             "label": "成交相場（1個）",
             "kind": "trades",
-            "fetchedDate": "2026-11-06",
+            "fetchedDate": "2026-11-07",
             "error": null
           },
           {
@@ -589,7 +589,7 @@
             "source": "pricebase",
             "label": "文章公布相場",
             "kind": "published",
-            "fetchedDate": "2026-11-06",
+            "fetchedDate": "2026-11-07",
             "error": null
           },
           {
@@ -602,9 +602,8 @@
         ],
         "historyErrors": {},
         "chartKey": "snkrdunk:846048:1個:trades",
-        "prev": 9120,
+        "prev": 8950,
         "spark": [
-          9999,
           10970,
           10400,
           10300,
@@ -633,10 +632,11 @@
           9000,
           8900,
           9120,
-          8950
+          8950,
+          9200
         ]
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     },
     "718620": {
       "pid": 718620,
@@ -650,21 +650,20 @@
       "prices": [
         [
           "Normal",
-          199.56,
-          184.99
+          197.53,
+          177.97
         ]
       ],
       "usdQuote": {
         "source": "tcgcsv",
-        "date": "2026-11-06",
+        "date": "2026-11-07",
         "stale": false
       },
       "sub": "Normal",
-      "market": 199.56,
-      "low": 184.99,
-      "prev": 204.15,
+      "market": 197.53,
+      "low": 177.97,
+      "prev": 199.56,
       "spark": [
-        195.81,
         196.41,
         192.41,
         194.79,
@@ -693,7 +692,8 @@
         206.55,
         206.07,
         204.15,
-        199.56
+        199.56,
+        197.53
       ],
       "japan": {
         "preferred": "snkrdunk",
@@ -704,12 +704,12 @@
             "key": "snkrdunk:881421:1個",
             "url": "https://snkrdunk.com/apparels/881421",
             "currency": "JPY",
-            "price": 21440,
+            "price": 20600,
             "kind": "listing",
             "label": "新品最低掛價（1個）",
             "variant": "1個",
-            "fetchedAt": "2026-11-06T01:42:02.930Z",
-            "date": "2026-11-06",
+            "fetchedAt": "2026-11-07T01:01:51.083Z",
+            "date": "2026-11-07",
             "stale": false
           },
           "pricebase": {
@@ -726,7 +726,7 @@
             "date": "2026-10-28",
             "stale": true,
             "error": "PRICE BASE 找不到與文章標題相符的當期相場",
-            "attemptedAt": "2026-11-06T01:42:02.930Z"
+            "attemptedAt": "2026-11-07T01:01:51.083Z"
           }
         },
         "historyChoices": [
@@ -735,7 +735,7 @@
             "source": "snkrdunk",
             "label": "成交相場（1個）",
             "kind": "trades",
-            "fetchedDate": "2026-11-06",
+            "fetchedDate": "2026-11-07",
             "error": null
           },
           {
@@ -765,9 +765,8 @@
           "pricebase": "文章沒有唯一、與商品相符的歷史圖表"
         },
         "chartKey": "snkrdunk:881421:1個:trades",
-        "prev": 20400,
+        "prev": 21440,
         "spark": [
-          26200,
           25899,
           25999,
           25999,
@@ -796,10 +795,11 @@
           20400,
           21500,
           20400,
-          21440
+          21440,
+          20600
         ]
       },
-      "date": "2026-11-06"
+      "date": "2026-11-07"
     }
   }
 }
